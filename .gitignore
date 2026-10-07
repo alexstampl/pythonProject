@@ -1,5 +1,15 @@
+# Виртуальное окружение
 venv/
 .env
+
+# Python-кэш
 __pycache__/
 *.pyc
+
+# IDE
 .idea/
+.vscode/
+
+# Windows Zone.Identifier
+*:Zone.Identifier
+
