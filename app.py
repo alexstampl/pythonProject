@@ -1,28 +1,56 @@
-from flask import Flask, render_template # render_template (для работы с шаблонами из папки templates)
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-# Используем базу данных SQLITE
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pythonProject.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-# Объявим таблицу и создадим колоночки
+# --- Модель ---
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    titel = db.Column(db.String(300), nullable=False) # nullable - обязательно к заполнению
+    title = db.Column(db.String(300), nullable=False)
     text = db.Column(db.Text, nullable=False)
 
+    def __repr__(self):
+        return f'<Post {self.id} {self.title}>'
 
 
-# Добавляем обработчик (как будут отображаться ссылки)
+# --- Создаём таблицы при первом запуске ---
+with app.app_context():
+    db.create_all()
+
+
+# --- Главная страница ---
 @app.route('/index')
 @app.route('/')
-# Главная страница
 def index():
-    return render_template('index.html')
+    posts = Post.query.order_by(Post.id.desc()).all()
+    return render_template('index.html', posts=posts)
 
-# О нас
+
+# --- Создание статьи ---
+@app.route('/create', methods=['POST', 'GET'])
+def create():
+    if request.method == 'POST':
+        title = request.form['title']
+        text = request.form['text']
+
+        post = Post(title=title, text=text)
+
+        try:
+            db.session.add(post)
+            db.session.commit()
+            return redirect('/')
+        except Exception as e:
+            db.session.rollback()
+            return f'Ошибка: {e}', 500
+    else:
+        return render_template('create.html')
+
+
+# --- О нас ---
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -30,4 +58,3 @@ def about():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
