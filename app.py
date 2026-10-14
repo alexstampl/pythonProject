@@ -26,8 +26,15 @@ with app.app_context():
 @app.route('/index')
 @app.route('/')
 def index():
-    posts = Post.query.order_by(Post.id.desc()).all()
-    return render_template('index.html', posts=posts)
+    # posts = Post.query.order_by(Post.id.desc()).all()
+    return render_template('index.html')
+
+# --- Отображение записией из БД ---
+@app.route('/post')
+def posts():
+    posts = Post.query.all()
+    return render_template('posts.html', posts=posts)
+
 
 
 # --- Создание статьи ---
@@ -42,7 +49,7 @@ def create():
         try:
             db.session.add(post)
             db.session.commit()
-            return redirect('/')
+            return redirect('/post')
         except Exception as e:
             db.session.rollback()
             return f'Ошибка: {e}', 500
