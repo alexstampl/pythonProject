@@ -57,6 +57,11 @@ def create():
         return render_template('create.html')
 
 
+# --- Проверка работоспособности (для Docker) ---
+@app.route('/health')
+def health():
+    return {'status': 'ok'}, 200
+
 # --- О нас ---
 @app.route('/about')
 def about():
@@ -64,4 +69,4 @@ def about():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
